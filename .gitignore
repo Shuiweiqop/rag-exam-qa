@@ -1,0 +1,9 @@
+# 密钥，绝对不能上传
+.env
+
+# 虚拟环境，太大且没必要传（别人用 requirements.txt 重建）
+env/
+
+# Python 缓存垃圾
+__pycache__/
+*.pyc
