@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Can ping an IP address but cannot open a website by its domain name. Which layer is the likely problem?",
+    "answer": "Application layer (DNS)",
+    "must_contain": "DNS"
+  },
+  {
+    "question": "A network cable is plugged in but there is no link light on the switch port. Which layer is affected?",
+    "answer": "Physical layer",
+    "must_contain": "physical medium"
+  },
+  {
+    "question": "Users report slow file transfers between two servers. Which layer should be checked first?",
+    "answer": "Transport layer (TCP retransmissions, flow control, congestion)",
+    "must_contain": "transport layer"
+  },
+  {
+    "question": "What does a router use to make forwarding decisions?",
+    "answer": "Destination IP, routing table, and routing protocol info",
+    "must_contain": "routing table"
+  },
+  {
+    "question": "At which layer does segmentation happen and what is it?",
+    "answer": "Transport layer divides packets into smaller segments with sequence numbers",
+    "must_contain": "Segmentation"
+  },
+  {
+    "question": "What is CRC and which layer does it operate at?",
+    "answer": "Cyclic Redundancy Check, an error-detecting code, operates at the data link layer",
+    "must_contain": "CRC"
+  },
+  {
+    "question": "What is the difference between half-duplex and full-duplex?",
+    "answer": "Half-duplex is one direction at a time; full-duplex is both directions simultaneously",
+    "must_contain": "Half-duplex"
+  },
+  {
+    "question": "Which protocol guarantees delivery and which one is faster, TCP or UDP?",
+    "answer": "TCP guarantees delivery but is slower; UDP does not guarantee but is faster",
+    "must_contain": "connection-oriented"
+  },
+  {
+    "question": "Which layers do IP addresses and MAC addresses operate at?",
+    "answer": "IP at the network layer, MAC at the data link layer",
+    "must_contain": "MAC address"
+  },
+  {
+    "question": "Which port does HTTPS use?",
+    "answer": "443",
+    "must_contain": "443"
+  },
+  {
+    "question": "Which layers can a firewall operate at?",
+    "answer": "Network layer, transport layer, and application layer depending on firewall type",
+    "must_contain": "firewall"
+  },
+  {
+    "question": "What is the process of adding headers and trailers as data goes down the layers called?",
+    "answer": "Encapsulation",
+    "must_contain": "Encapsulation"
+  },
+  {
+    "question": "What is it called when a message is sent from one sender to a single receiver?",
+    "answer": "Unicast",
+    "must_contain": "Unicast"
+  },
+  {
+    "question": "What are the seven layers of the OSI model?",
+    "answer": "Physical, data link, network, transport, session, presentation, application",
+    "must_contain": "seven layers"
+  },
+  {
+    "question": "How many layers does the TCP/IP model have and what are they?",
+    "answer": "Four: application, transport, internet, network access",
+    "must_contain": "TCP/IP model"
+  },
+  {
+    "question": "Which mechanism prevents the receiver's buffer from overflowing?",
+    "answer": "Flow control",
+    "must_contain": "Flow control"
+  },
+  {
+    "question": "Which command tests connectivity and latency to a device?",
+    "answer": "ping (sends ICMP echo request)",
+    "must_contain": "Ping"
+  },
+  {
+    "question": "Which devices operate at the network layer?",
+    "answer": "Router",
+    "must_contain": "router"
+  },
+  {
+    "question": "What common problems occur at the physical layer?",
+    "answer": "Damaged cables, loose connectors, interference, signal attenuation",
+    "must_contain": "damaged cables"
+  },
+  {
+    "question": "What does the presentation layer do?",
+    "answer": "Translation, formatting, compression, and encryption of data",
+    "must_contain": "presentation layer"
+  }
+]

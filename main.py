@@ -4,7 +4,7 @@ from google import genai
 from dotenv import load_dotenv
 from fastapi import FastAPI          # 新：开窗口的框架
 from pydantic import BaseModel       # 新：定义"递进来的数据长什么样"
-
+from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
@@ -20,7 +20,13 @@ def get_conn():
 
 # ---- 创建 FastAPI 应用（相当于"开一家店"）----
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],   # 允许你的前端地址
+    allow_credentials=True,
+    allow_methods=["*"],                        # 允许所有 HTTP 方法(GET/POST 等)
+    allow_headers=["*"],                        # 允许所有请求头
+)
 # ==================== 定义"递进来的数据格式" ====================
 # 就像 Laravel 的 Request 验证：告诉系统前端会传什么字段
 class UploadRequest(BaseModel):
