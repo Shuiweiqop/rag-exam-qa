@@ -44,6 +44,11 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
+# ---- A/B 测试用独立的表，不碰线上检索用的 documents ----
+AB_TABLE = "documents_ab"
+cur.execute(f"create table if not exists {AB_TABLE} (like documents including all)")
+conn.commit()
+
 # ---- 算 embedding 的小函数（带重试，撞限速就等着再来）----
 def embed(text):
     while True:
@@ -59,10 +64,10 @@ def embed(text):
 
 # ---- 用某种切法：清空→切→存 ----
 def load_with_strategy(chunks):
-    cur.execute("delete from documents")
+    cur.execute(f"delete from {AB_TABLE}")
     for c in chunks:
         vec = embed(c)
-        cur.execute("insert into documents (content, embedding) values (%s, %s)", (c, str(vec)))
+        cur.execute(f"insert into {AB_TABLE} (content, embedding) values (%s, %s)", (c, str(vec)))
         time.sleep(1)
     conn.commit()
 
@@ -72,7 +77,7 @@ def run_eval():
     for q in questions:
         qvec = embed(q["question"])
         cur.execute(
-            "select content from documents order by embedding <=> %s::vector limit 3",
+            f"select content from {AB_TABLE} order by embedding <=> %s::vector limit 3",
             (str(qvec),)
         )
         top3 = [row[0] for row in cur.fetchall()]

@@ -95,8 +95,8 @@ Open `http://localhost:5173`.
 - `ask.py`: full RAG (retrieval + grounded generation) from the CLI
 - `main.py`: FastAPI app exposing `/upload` and `/ask`
 - `evaluate.py`: runs the eval set, reports recall@1 and recall@3
-- `compare_chunking.py`: A/B tests chunking strategies against the eval set
-- `rag_agent.py`: agent version: retrieval as a smolagents tool
+- `compare_chunking.py`: A/B tests chunking strategies against the eval set (uses its own `documents_ab` table, so it never touches the live `documents` table)
+- `rag_agent.py`: agent version, with retrieval wrapped as a smolagents tool
 - `mcp_server.py`: MCP server (stdio) exposing retrieval as a tool
 
 ## Notes
@@ -141,6 +141,5 @@ Use the venv's Python so `mcp` and `psycopg2` are importable. In stdio mode stdo
 channel, so the server must not `print()`; errors show up in the server's stderr.
 
 ## Known Limitations
-- **Chunk boundaries:** fixed-length chunking can cut mid-word or mid-sentence (e.g. a retrieved passage starting with `"e network layer handles..."`), which loses context at the edges.
 - **Ranking:** results are ordered by raw vector distance only, with no reranking and no distance threshold, so `top_k` passages are always returned even when none of them is relevant.
 - **Database connection:** `search()` opens and closes a new PostgreSQL connection on every call (no connection pooling), which adds latency per query and would not scale under concurrent load.
