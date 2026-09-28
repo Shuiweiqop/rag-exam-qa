@@ -93,9 +93,48 @@ Open `http://localhost:5173`.
 - `main.py` — FastAPI app exposing `/upload` and `/ask`
 - `evaluate.py` — runs the eval set, reports recall@1 and recall@3
 - `compare_chunking.py` — A/B tests chunking strategies against the eval set
+- `rag_agent.py` — agent version: retrieval as a smolagents tool
+- `mcp_server.py` — MCP server (stdio) exposing retrieval as a tool
 
 ## Notes
 
 - `gemini-embedding-001` outputs 3072-dimensional vectors by default; the pgvector column matches.
 - Questions and documents must be embedded with the same model and dimensions to share a comparable vector space.
 - Gemini's free tier is rate-limited (HTTP 429); scripts include request pacing / retry with backoff.
+
+## Agent Version (smolagents)
+
+The original pipeline always retrieves before answering. This version wraps
+retrieval as a tool, so the model decides whether and what to retrieve.
+
+**How it works**
+- `search.py` exposes `search(query, top_k)` as a reusable function
+- `rag_agent.py` wraps it as a smolagents `@tool` and uses Gemini (`gemini-2.5-flash`) via LiteLLM
+
+**Observed behavior**
+- For "What does OSI layer 3 do?", the agent rewrote the question into a search query (`"OSI layer 3 functionality"`), called the tool, and answered from the retrieved passages (network layer: routing, forwarding, addressing).
+- For "Hi, who are you?", the agent answered directly without calling the tool.
+
+**Run it**
+```bash
+pip install -r requirements.txt   # includes smolagents and litellm
+python rag_agent.py
+```
+
+## MCP Server
+
+`mcp_server.py` exposes the same `search()` as an MCP tool (`search_knowledge_base`) over stdio,
+so any MCP host (e.g. Claude Code, Claude Desktop) can search this knowledge base without knowing
+anything about pgvector or Gemini. Built on MCP Python SDK 2.x (`MCPServer`).
+
+Tested with MCP Inspector (`tools/list` and `tools/call`):
+```bash
+npx @modelcontextprotocol/inspector env\Scripts\python.exe mcp_server.py
+```
+Use the venv's Python so `mcp` and `psycopg2` are importable. In stdio mode stdout is the protocol
+channel, so the server must not `print()`; errors show up in the server's stderr.
+
+## Known Limitations
+- **Chunk boundaries:** fixed-length chunking can cut mid-word or mid-sentence (e.g. a retrieved passage starting with `"e network layer handles..."`), which loses context at the edges.
+- **Ranking:** results are ordered by raw vector distance only, with no reranking and no distance threshold, so `top_k` passages are always returned even when none of them is relevant.
+- **Database connection:** `search()` opens and closes a new PostgreSQL connection on every call (no connection pooling), which adds latency per query and would not scale under concurrent load.
