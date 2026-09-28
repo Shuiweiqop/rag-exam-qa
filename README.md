@@ -2,7 +2,10 @@
 
 A retrieval-augmented generation (RAG) system for answering exam-style questions from course material. Given a question, it retrieves the most relevant passages from a knowledge base and generates a grounded answer **with a cited source**, so every answer can be traced back to the material it came from.
 
-Built as a hands-on project to go deep on the RAG pipeline end to end — not just wiring an API, but measuring retrieval quality with a real evaluation set.
+Built as a hands-on project to go deep on the RAG pipeline end to end: not just wiring an API, but measuring retrieval quality with a real evaluation set.
+
+It also includes an agent version where the model decides when to retrieve,
+and an MCP server that exposes retrieval to any MCP host.
 
 ## Why this project
 
@@ -36,9 +39,9 @@ Retrieval quality is measured against a 20-question eval set built from real OSI
 
 **Key results and findings:**
 
-- On a well-aligned knowledge base, retrieval reached **Recall@1 = 85%, Recall@3 = 95%** — taking the top 3 chunks recovers ~10% more than the top 1, so the system retrieves top-3.
-- A/B tested three chunking strategies (by-paragraph vs. fixed-length vs. overlapping) on the same document and eval set. By-paragraph performed best, but the three were close (40–45%).
-- **Most important finding:** recall dropped sharply when the knowledge base didn't cover the questions' topics, regardless of chunking. The dominant factor in RAG quality is **content coverage**, not chunking strategy — chunking is a second-order optimization once coverage is ensured. (Caveat: these are observations on a small eval set, not a general law.)
+- On a well-aligned knowledge base, retrieval reached **Recall@1 = 85%, Recall@3 = 95%**. Taking the top 3 chunks recovers ~10% more than the top 1, so the system retrieves top-3.
+- A/B tested three chunking strategies (by-paragraph vs. fixed-length vs. overlapping) on a separate, less-aligned document with the same eval set. By-paragraph performed best, but the three were close (40–45%).
+- **Most important finding:** recall dropped sharply when the knowledge base didn't cover the questions' topics, regardless of chunking. The dominant factor in RAG quality is **content coverage**, not chunking strategy. Chunking is a second-order optimization once coverage is ensured. (Caveat: these are observations on a small eval set, not a general law.)
 
 ## API
 
@@ -87,14 +90,14 @@ Open `http://localhost:5173`.
 
 ## Scripts
 
-- `seed.py` — batch-loads knowledge chunks into pgvector (clears the table first; re-runnable)
-- `search.py` — retrieval only (question -> top-k passages)
-- `ask.py` — full RAG (retrieval + grounded generation) from the CLI
-- `main.py` — FastAPI app exposing `/upload` and `/ask`
-- `evaluate.py` — runs the eval set, reports recall@1 and recall@3
-- `compare_chunking.py` — A/B tests chunking strategies against the eval set
-- `rag_agent.py` — agent version: retrieval as a smolagents tool
-- `mcp_server.py` — MCP server (stdio) exposing retrieval as a tool
+- `seed.py`: batch-loads knowledge chunks into pgvector (clears the table first; re-runnable)
+- `search.py`: retrieval only (question -> top-k passages)
+- `ask.py`: full RAG (retrieval + grounded generation) from the CLI
+- `main.py`: FastAPI app exposing `/upload` and `/ask`
+- `evaluate.py`: runs the eval set, reports recall@1 and recall@3
+- `compare_chunking.py`: A/B tests chunking strategies against the eval set
+- `rag_agent.py`: agent version: retrieval as a smolagents tool
+- `mcp_server.py`: MCP server (stdio) exposing retrieval as a tool
 
 ## Notes
 
@@ -112,7 +115,10 @@ retrieval as a tool, so the model decides whether and what to retrieve.
 - `rag_agent.py` wraps it as a smolagents `@tool` and uses Gemini (`gemini-2.5-flash`) via LiteLLM
 
 **Observed behavior**
-- For "What does OSI layer 3 do?", the agent rewrote the question into a search query (`"OSI layer 3 functionality"`), called the tool, and answered from the retrieved passages (network layer: routing, forwarding, addressing).
+- For "What does OSI layer 3 do?" (asked in Chinese), the agent first searched
+  with the original question and got only a general OSI overview. It then
+  rewrote the query to include "network layer", searched again, and answered
+  from the second result (routing, forwarding, addressing).
 - For "Hi, who are you?", the agent answered directly without calling the tool.
 
 **Run it**
